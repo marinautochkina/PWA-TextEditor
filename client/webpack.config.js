@@ -1,11 +1,8 @@
-
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WebpackPwaManifest = require('webpack-pwa-manifest');
 const path = require('path');
 const { InjectManifest } = require('workbox-webpack-plugin');
-
-// TODO: Add and configure workbox plugins for a service worker and manifest file.
-// TODO: Add CSS loaders and babel to webpack.
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = () => {
   return {
@@ -17,38 +14,48 @@ module.exports = () => {
     output: {
       filename: '[name].bundle.js',
       path: path.resolve(__dirname, 'dist'),
+      publicPath: '/',
     },
     plugins: [
       new HtmlWebpackPlugin({
         template: './index.html',
-        title: 'PWA Text Editor'
+        title: 'J.A.T.E'
       }),
-
       new InjectManifest({
         swSrc: './src-sw.js',
-        swDest: 'src-sw.js'
+        swDest: 'src-sw.js',
       }),
-
       new WebpackPwaManifest({
-        name: 'PWA Text Editor',
-        short_name: 'TextEditor',
-        description: 'A progressive web application text editor',
-        background: '#ffffff',
-        theme_color: '#317EFB',
-        start_url: '/',
-        publicPath: '/',
         fingerprints: false,
         inject: true,
+        id: '/',
+        name: 'Just Another Text Editor',
+        short_name: 'J.A.T.E',
+        description: 'Takes notes with JavaScript syntax highlighting!',
+        background_color: '#225ca3',
+        theme_color: '#225ca3',
+        start_url: '/',
+        publicPath: '/',
         icons: [
           {
             src: path.resolve('src/images/logo.png'),
-            size: [96, 128, 192, 256, 384, 512],
+            sizes: [96, 128, 192, 256, 384, 512],
             destination: path.join('assets', 'icons'),
           },
         ],
       }),
+      new CopyWebpackPlugin({
+        patterns: [
+          { 
+            from: 'src/images', 
+            to: 'assets/images',
+            globOptions: {
+              ignore: ['**/webpack.config.js', '**/icon_*.png'],
+            },   
+          },
+        ],
+      }),
     ],
-
     module: {
       rules: [
         {
@@ -62,6 +69,7 @@ module.exports = () => {
             loader: 'babel-loader',
             options: {
               presets: ['@babel/preset-env'],
+              plugins: ['@babel/plugin-proposal-object-rest-spread', '@babel/transform-runtime'],
             },
           },
         },
